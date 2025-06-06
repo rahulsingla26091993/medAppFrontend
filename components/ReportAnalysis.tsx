@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { StyleSheet, ScrollView, View, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { StyleSheet, ScrollView, View, ActivityIndicator, useWindowDimensions, Platform } from 'react-native';
 import { MedicalReportAnalysis } from '@/services/api';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
@@ -41,42 +41,46 @@ interface ReportAnalysisProps {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: 0,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 2,
     overflow: 'hidden',
+    margin: 0,
+    width: '100%',
   },
   wideContainer: {
     maxWidth: 800,
     alignSelf: 'center',
     width: '100%',
+    margin: 0,
+    borderRadius: Platform.OS === 'web' ? 16 : 0,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    padding: Platform.OS === 'ios' ? 16 : 14,
     borderBottomWidth: 1,
-    gap: 12,
+    gap: 10,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: Platform.OS === 'ios' ? 18 : 16,
     fontWeight: '600',
   },
   scrollContainer: {
     flex: 1,
   },
   content: {
-    padding: 20,
-    gap: 24,
+    padding: Platform.OS === 'ios' ? 16 : 14,
+    gap: 16,
   },
   analysisContainer: {
-    padding: 16,
+    padding: Platform.OS === 'ios' ? 16 : 14,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: {
@@ -85,39 +89,39 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 1,
   },
   analysisText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: Platform.OS === 'ios' ? 16 : 15,
+    lineHeight: Platform.OS === 'ios' ? 24 : 22,
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 40,
+    padding: Platform.OS === 'ios' ? 40 : 32,
     gap: 16,
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: Platform.OS === 'ios' ? 16 : 15,
   },
   errorContainer: {
-    padding: 24,
-    borderRadius: 16,
-    gap: 16,
+    padding: Platform.OS === 'ios' ? 24 : 20,
+    borderRadius: 12,
+    gap: 12,
   },
   errorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   errorTitle: {
-    fontSize: 18,
+    fontSize: Platform.OS === 'ios' ? 18 : 16,
     fontWeight: '600',
   },
   errorText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: Platform.OS === 'ios' ? 16 : 15,
+    lineHeight: Platform.OS === 'ios' ? 24 : 22,
   },
 });
 
@@ -170,7 +174,7 @@ export function ReportAnalysis({ analysis, isLoading }: ReportAnalysisProps) {
         {
           backgroundColor: colors.surface,
         },
-        isWideScreen && styles.wideContainer
+        isWideScreen ? styles.wideContainer : { borderRadius: 0, margin: 0, width: '100%' }
       ]}
     >
       <ThemedView style={[styles.header, { borderBottomColor: colors.border }]}>

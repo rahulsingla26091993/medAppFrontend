@@ -344,32 +344,33 @@ export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadPro
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     alignItems: 'center',
     width: '100%',
-    maxWidth: 600,
+    maxWidth: Platform.OS === 'web' ? 600 : '100%',
     alignSelf: 'center',
+    paddingHorizontal: Platform.OS === 'web' ? 0 : 20,
   },
   form: {
     width: '100%',
-    gap: 20,
+    gap: 16,
   },
   inputContainer: {
     width: '100%',
   },
   label: {
     marginBottom: 8,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
+    color: Platform.OS === 'ios' ? undefined : '#666',
   },
   textInput: {
     width: '100%',
     borderWidth: 1,
     borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    minHeight: 100,
+    padding: Platform.OS === 'ios' ? 16 : 12,
+    fontSize: 15,
+    minHeight: 80,
   },
   historyToggle: {
     flexDirection: 'row',
@@ -409,28 +410,27 @@ const styles = StyleSheet.create({
   },
   fileName: {
     fontSize: 14,
-  },
-  uploadButton: {
+  },  uploadButton: {
     borderRadius: 12,
     width: '100%',
-    minHeight: 120,
+    minHeight: Platform.OS === 'web' ? 120 : 100,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: Platform.OS === 'web' ? 20 : 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 2,
+    shadowRadius: 3,
+    elevation: 2,
+    borderWidth: Platform.OS === 'ios' ? 2 : 1,
     borderStyle: 'dashed',
   },
   buttonContent: {
     alignItems: 'center',
-    gap: 12,
+    gap: Platform.OS === 'web' ? 12 : 8,
   },
   buttonTextContainer: {
     alignItems: 'center',

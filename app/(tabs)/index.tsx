@@ -128,10 +128,9 @@ function Feature({ iconName, title, description, accentColor }: FeatureProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
   },
   wideContainer: {
     maxWidth: 1200,
@@ -139,41 +138,42 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   headerContent: {
-    marginTop: 32,
-    marginBottom: 40,
+    marginTop: Platform.OS === 'ios' ? 16 : 24,
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
   titleContainer: {
-    marginBottom: 40,
+    marginBottom: 24,
     alignItems: 'center',
   },
   title: {
-    fontSize: 40,
+    fontSize: Platform.OS === 'ios' ? 32 : 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    letterSpacing: -1,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 20,
     textAlign: 'center',
     marginTop: 12,
     opacity: 0.8,
-  },
-  featuresContainer: {
-    marginBottom: 40,
+  },  featuresContainer: {
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
   featuresGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 20,
+    gap: 12,
     justifyContent: 'center',
   },
   featureCard: {
-    marginBottom: 20,
-    borderRadius: 16,
+    marginBottom: 12,
+    borderRadius: 12,
     overflow: 'hidden',
     flex: 1,
-    minWidth: 300,
-    maxWidth: 380,
+    minWidth: Platform.OS === 'web' ? 300 : '100%',
+    maxWidth: Platform.OS === 'web' ? 380 : undefined,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -239,10 +239,11 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#c62828',
     fontSize: 15,
-  },
-  analysisContainer: {
-    borderRadius: 16,
+  },  analysisContainer: {
+    borderRadius: 0,
     overflow: 'hidden',
+    width: '100%',
+    margin: 0,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
