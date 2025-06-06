@@ -7,15 +7,34 @@ export interface MedicalReportAnalysis {
   error?: string;
 }
 
-export async function analyzeMedicalReport(formData: FormData): Promise<MedicalReportAnalysis> {
+export interface AnalyzeParams {
+  file: File;
+  problemDescription: string;
+  hasMedicalHistory: boolean;
+  previousDocuments?: File[];
+}
+
+export async function analyzeMedicalReport(params: AnalyzeParams): Promise<MedicalReportAnalysis> {
   console.log('Starting medical report analysis...');
   try {
-    // Log the form data for debugging
-    const file = formData.get('file') as File | null;
+    const formData = new FormData();
+    formData.append('file', params.file);
+    formData.append('problem_description', params.problemDescription);
+    formData.append('has_medical_history', params.hasMedicalHistory.toString());
+
+    if (params.hasMedicalHistory && params.previousDocuments?.length) {
+      params.previousDocuments.forEach((doc, index) => {
+        formData.append('previous_documents', doc);
+      });
+    }
+
     console.log('FormData:', {
       filePresent: formData.has('file'),
-      fileType: file instanceof File ? file.type : 'unknown',
-      fileName: file instanceof File ? file.name : 'unknown'
+      fileType: params.file instanceof File ? params.file.type : 'unknown',
+      fileName: params.file.name,
+      problemDescription: params.problemDescription,
+      hasMedicalHistory: params.hasMedicalHistory,
+      previousDocumentsCount: params.previousDocuments?.length || 0
     });
 
     const response = await fetch(`${API_URL}/analyze`, {

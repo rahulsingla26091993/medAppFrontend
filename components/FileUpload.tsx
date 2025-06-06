@@ -1,6 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { useState } from 'react';
-import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform, View, Dimensions } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform, View, TextInput } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
@@ -14,52 +14,84 @@ import { Colors } from '@/constants/Colors';
 interface FileUploadProps {
   onAnalysisComplete: (analysis: MedicalReportAnalysis) => void;
   onError: (error: string) => void;
+  style?: any;
 }
 
-export function FileUpload({ onAnalysisComplete, onError }: FileUploadProps) {
+export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [problemDescription, setProblemDescription] = useState('');
+  const [hasMedicalHistory, setHasMedicalHistory] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [previousDocuments, setPreviousDocuments] = useState<DocumentPicker.DocumentPickerAsset[]>([]);
+  
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
-  const handleUpload = async (fileResult: DocumentPicker.DocumentPickerResult) => {
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError('Please select a medical report file');
+      onError('Please select a medical report file');
+      return;
+    }
+
+    if (!problemDescription.trim()) {
+      setError('Please describe your medical concern');
+      onError('Please describe your medical concern');
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
     setUploadProgress(0);
     
     try {
-      if (fileResult.canceled || !fileResult.assets || fileResult.assets.length === 0) {
-        throw new Error('No file selected');
-      }
-
-      const file = fileResult.assets[0];
-      console.log('Selected file:', {
-        name: file.name,
-        type: file.mimeType,
-        size: file.size,
-        uri: file.uri
-      });
-
       // Create FormData
       const formData = new FormData();
       
-      // Create a proper File or Blob object
+      // Add main file
       if (Platform.OS === 'web') {
         // For web, convert to Blob
-        const response = await fetch(file.uri);
+        const response = await fetch(selectedFile.uri);
         const blob = await response.blob();
-        formData.append('file', blob, file.name);
+        formData.append('file', blob, selectedFile.name);
       } else {
         // For mobile platforms
         formData.append('file', {
-          uri: Platform.OS === 'ios' ? file.uri.replace('file://', '') : file.uri,
-          type: file.mimeType || 'application/octet-stream',
-          name: file.name
+          uri: Platform.OS === 'ios' ? selectedFile.uri.replace('file://', '') : selectedFile.uri,
+          type: selectedFile.mimeType || 'application/octet-stream',
+          name: selectedFile.name
         } as any);
       }
 
-      const analysis = await analyzeMedicalReport(formData);
+      // Add problem description and medical history flag
+      formData.append('problem_description', problemDescription);
+      formData.append('has_medical_history', hasMedicalHistory.toString());
+
+      // Add previous documents if any
+      if (hasMedicalHistory && previousDocuments.length > 0) {
+        for (const doc of previousDocuments) {
+          if (Platform.OS === 'web') {
+            const response = await fetch(doc.uri);
+            const blob = await response.blob();
+            formData.append('previous_documents', blob, doc.name);
+          } else {
+            formData.append('previous_documents', {
+              uri: Platform.OS === 'ios' ? doc.uri.replace('file://', '') : doc.uri,
+              type: doc.mimeType || 'application/octet-stream',
+              name: doc.name
+            } as any);
+          }
+        }
+      }
+
+      const analysis = await analyzeMedicalReport({
+        file: selectedFile as any,
+        problemDescription,
+        hasMedicalHistory,
+        previousDocuments: previousDocuments as any[]
+      });
       
       if (!analysis.success) {
         throw new Error(analysis.error || 'Failed to analyze medical report');
@@ -77,15 +109,21 @@ export function FileUpload({ onAnalysisComplete, onError }: FileUploadProps) {
     }
   };
 
-  const pickDocument = async () => {
+  const pickDocument = async (forHistory: boolean = false) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf', 'image/*'],
-        multiple: false,
+        multiple: forHistory,
         copyToCacheDirectory: true
       });
       
-      await handleUpload(result);
+      if (!result.canceled) {
+        if (forHistory) {
+          setPreviousDocuments(result.assets);
+        } else {
+          setSelectedFile(result.assets[0]);
+        }
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error selecting file';
       setError(errorMessage);
@@ -94,7 +132,7 @@ export function FileUpload({ onAnalysisComplete, onError }: FileUploadProps) {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, style]}>
       {error && (
         <Animated.View 
           entering={FadeIn} 
@@ -112,88 +150,196 @@ export function FileUpload({ onAnalysisComplete, onError }: FileUploadProps) {
         </Animated.View>
       )}
       
-      {isLoading ? (
-        <Animated.View 
-          entering={FadeIn} 
-          exiting={FadeOut}
-          style={[
-            styles.loadingContainer,
-            {
-              backgroundColor: colors.backdrop
-            }
-          ]}
+      <ThemedView style={styles.form}>
+        {/* Problem Description Input */}
+        <View style={styles.inputContainer}>
+          <ThemedText style={styles.label}>Describe your medical concern:</ThemedText>
+          <TextInput
+            style={[
+              styles.textInput,
+              { 
+                color: colors.text,
+                backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.surface,
+                borderColor: colors.border
+              }
+            ]}
+            value={problemDescription}
+            onChangeText={setProblemDescription}
+            placeholder="E.g., Experiencing frequent headaches and dizziness"
+            placeholderTextColor={colors.icon}
+            multiline
+            numberOfLines={3}
+          />
+        </View>
+
+        {/* Medical History Toggle */}
+        <TouchableOpacity 
+          style={styles.historyToggle}
+          onPress={() => setHasMedicalHistory(!hasMedicalHistory)}
         >
-          <View style={styles.loadingContent}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <ThemedText style={[styles.loadingText, { color: colors.primary }]}>
-              {uploadProgress > 0 
-                ? `Uploading... ${Math.round(uploadProgress)}%`
-                : 'Analyzing medical report...'}
-            </ThemedText>
-          </View>
           <View style={[
-            styles.progressBarContainer,
+            styles.checkbox,
             {
-              backgroundColor: colorScheme === 'dark' 
-                ? 'rgba(255, 255, 255, 0.1)' 
-                : 'rgba(0, 0, 0, 0.1)'
+              borderColor: colors.primary,
+              backgroundColor: hasMedicalHistory ? colors.primary : 'transparent'
             }
           ]}>
-            <View 
+            {hasMedicalHistory && (
+              <Ionicons name="checkmark" size={16} color={colors.surface} />
+            )}
+          </View>
+          <ThemedText>I have relevant medical history documents</ThemedText>
+        </TouchableOpacity>
+
+        {/* Previous Documents Uploader */}
+        {hasMedicalHistory && (
+          <View style={styles.historyDocuments}>
+            <TouchableOpacity 
+              onPress={() => pickDocument(true)}
               style={[
-                styles.progressBar,
-                { 
-                  backgroundColor: colors.primary,
-                  width: `${uploadProgress}%`
+                styles.historyUploadButton,
+                {
+                  backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.surface,
+                  borderColor: colors.border
                 }
               ]}
-            />
-          </View>
-        </Animated.View>
-      ) : (
-        <TouchableOpacity 
-          onPress={pickDocument}
-          style={[
-            styles.uploadButton,
-            {
-              backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.primary,
-              borderColor: colorScheme === 'dark' ? colors.primary : 'rgba(255,255,255,0.2)',
-            },
-            isLoading && styles.buttonDisabled
-          ]}
-          disabled={isLoading}
-        >
-          <View style={styles.buttonContent}>
-            <Ionicons 
-              name="cloud-upload-outline" 
-              size={32} 
-              color={colorScheme === 'dark' ? colors.primary : colors.surface}
-            />
-            <View style={styles.buttonTextContainer}>
-              <ThemedText 
-                style={[
-                  styles.buttonText,
-                  colorScheme === 'dark' 
-                    ? { color: colors.text }
-                    : { color: colors.surface }
-                ]}
-              >
-                Select Medical Report
+            >
+              <Ionicons 
+                name="document-attach-outline" 
+                size={24} 
+                color={colors.primary}
+              />
+              <ThemedText style={styles.historyButtonText}>
+                {previousDocuments.length > 0 
+                  ? `${previousDocuments.length} document(s) selected`
+                  : 'Add previous medical documents'}
               </ThemedText>
-              <ThemedText 
-                style={[
-                  styles.buttonSubtext,
-                  colorScheme === 'dark' 
-                    ? { color: colors.icon }
-                    : { color: 'rgba(255,255,255,0.8)' }
-                ]}
-              >
-                PDF, PNG, JPG up to 10MB
+            </TouchableOpacity>
+            {previousDocuments.length > 0 && (
+              <View style={styles.selectedFiles}>
+                {previousDocuments.map((doc, index) => (
+                  <View key={index} style={styles.selectedFile}>
+                    <Ionicons name="document-outline" size={16} color={colors.icon} />
+                    <ThemedText style={styles.fileName}>{doc.name}</ThemedText>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Main Document Upload Button */}
+        {isLoading ? (
+          <Animated.View 
+            entering={FadeIn} 
+            exiting={FadeOut}
+            style={[
+              styles.loadingContainer,
+              {
+                backgroundColor: colors.backdrop
+              }
+            ]}
+          >
+            <View style={styles.loadingContent}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <ThemedText style={[styles.loadingText, { color: colors.primary }]}>
+                {uploadProgress > 0 
+                  ? `Uploading... ${Math.round(uploadProgress)}%`
+                  : 'Analyzing medical report...'}
               </ThemedText>
             </View>
-          </View>
-        </TouchableOpacity>
-      )}
+            <View style={[
+              styles.progressBar,
+              {
+                backgroundColor: colorScheme === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.1)' 
+                  : 'rgba(0, 0, 0, 0.1)'
+              }
+            ]}>
+              <View 
+                style={[
+                  styles.progressBarFill,
+                  { 
+                    backgroundColor: colors.primary,
+                    width: `${uploadProgress}%`
+                  }
+                ]}
+              />
+            </View>
+          </Animated.View>
+        ) : (
+          <>
+            <TouchableOpacity 
+              onPress={() => pickDocument(false)}
+              style={[
+                styles.uploadButton,
+                {
+                  backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.primary,
+                  borderColor: colorScheme === 'dark' ? colors.primary : 'rgba(255,255,255,0.2)',
+                }
+              ]}
+            >
+              <View style={styles.buttonContent}>
+                <Ionicons 
+                  name="cloud-upload-outline" 
+                  size={32} 
+                  color={colorScheme === 'dark' ? colors.primary : colors.surface}
+                />
+                <View style={styles.buttonTextContainer}>
+                  <ThemedText 
+                    style={[
+                      styles.buttonText,
+                      colorScheme === 'dark' 
+                        ? { color: colors.text }
+                        : { color: colors.surface }
+                    ]}
+                  >
+                    {selectedFile ? 'Change Medical Report' : 'Select Medical Report'}
+                  </ThemedText>
+                  <ThemedText 
+                    style={[
+                      styles.buttonSubtext,
+                      colorScheme === 'dark' 
+                        ? { color: colors.icon }
+                        : { color: 'rgba(255,255,255,0.8)' }
+                    ]}
+                  >
+                    PDF, PNG, JPG up to 10MB
+                  </ThemedText>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {selectedFile && (
+              <View style={styles.selectedMainFile}>
+                <Ionicons name="document-text-outline" size={20} color={colors.primary} />
+                <ThemedText style={[styles.selectedFileName, { color: colors.text }]}>
+                  {selectedFile.name}
+                </ThemedText>
+              </View>
+            )}
+
+            {/* Analyze Button */}
+            {selectedFile && (
+              <TouchableOpacity 
+                style={[
+                  styles.analyzeButton,
+                  {
+                    backgroundColor: colors.primary,
+                    opacity: !problemDescription.trim() ? 0.5 : 1
+                  }
+                ]}
+                onPress={handleUpload}
+                disabled={!problemDescription.trim()}
+              >
+                <ThemedText style={[styles.analyzeButtonText, { color: colors.surface }]}>
+                  Analyze Report
+                </ThemedText>
+              </TouchableOpacity>
+            )}
+          </>
+        )}
+      </ThemedView>
     </ThemedView>
   );
 }
@@ -204,6 +350,65 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
+  },
+  form: {
+    width: '100%',
+    gap: 20,
+  },
+  inputContainer: {
+    width: '100%',
+  },
+  label: {
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  textInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    minHeight: 100,
+  },
+  historyToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  historyDocuments: {
+    width: '100%',
+    gap: 12,
+  },
+  historyUploadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 12,
+  },
+  historyButtonText: {
+    fontSize: 16,
+  },
+  selectedFiles: {
+    gap: 8,
+  },
+  selectedFile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  fileName: {
+    fontSize: 14,
   },
   uploadButton: {
     borderRadius: 12,
@@ -234,12 +439,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  buttonDisabled: {
-    opacity: 0.5
-  },
   buttonSubtext: {
     fontSize: 14,
-    marginTop: 4
+    marginTop: 4,
+  },
+  selectedMainFile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+  },
+  selectedFileName: {
+    fontSize: 16,
+  },
+  analyzeButton: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  analyzeButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
   },
   errorContainer: {
     flexDirection: 'row',
@@ -270,13 +493,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  progressBarContainer: {
+  progressBar: {
     marginTop: 16,
     height: 4,
     borderRadius: 2,
     overflow: 'hidden',
   },
-  progressBar: {
+  progressBarFill: {
     height: '100%',
     width: '0%',
     borderRadius: 2,
