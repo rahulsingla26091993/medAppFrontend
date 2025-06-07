@@ -1,49 +1,46 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { useState } from 'react';
-import { ActivityIndicator, StyleSheet, TouchableOpacity, Platform, View, TextInput } from 'react-native';
+import { ActivityIndicator, TouchableOpacity, Platform, View, TextInput, StyleProp, ViewStyle } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
-import { analyzeMedicalReport, MedicalReportAnalysis } from '@/services/api';
+import { analyzeMedicalReport } from '@/services/api';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import { styles } from '@/styles/fileUpload';
+import { useAnalysis } from './ReportAnalysis';
 
 interface FileUploadProps {
-  onAnalysisComplete: (analysis: MedicalReportAnalysis) => void;
-  onError: (error: string) => void;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
-export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+export function FileUpload({ style }: FileUploadProps) {
   const [problemDescription, setProblemDescription] = useState('');
   const [hasMedicalHistory, setHasMedicalHistory] = useState(false);
   const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [previousDocuments, setPreviousDocuments] = useState<DocumentPicker.DocumentPickerAsset[]>([]);
-  
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { setAnalysis, setError, error } = useAnalysis();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   const handleUpload = async () => {
     if (!selectedFile) {
       setError('Please select a medical report file');
-      onError('Please select a medical report file');
       return;
     }
 
     if (!problemDescription.trim()) {
       setError('Please describe your medical concern');
-      onError('Please describe your medical concern');
       return;
     }
 
     setError(null);
-    setIsLoading(true);
+    setIsUploading(true);
     setUploadProgress(0);
     
     try {
@@ -97,14 +94,13 @@ export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadPro
         throw new Error(analysis.error || 'Failed to analyze medical report');
       }
       
-      onAnalysisComplete(analysis);
+      setAnalysis(analysis);
     } catch (err) {
       console.error('Upload error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to analyze medical report';
       setError(errorMessage);
-      onError(errorMessage);
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
       setUploadProgress(0);
     }
   };
@@ -127,7 +123,6 @@ export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadPro
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error selecting file';
       setError(errorMessage);
-      onError(errorMessage);
     }
   };
 
@@ -229,7 +224,7 @@ export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadPro
         )}
 
         {/* Main Document Upload Button */}
-        {isLoading ? (
+        {isUploading ? (
           <Animated.View 
             entering={FadeIn} 
             exiting={FadeOut}
@@ -343,165 +338,3 @@ export function FileUpload({ onAnalysisComplete, onError, style }: FileUploadPro
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({  container: {
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: Platform.OS === 'web' ? 600 : '100%',
-    alignSelf: 'center',
-    paddingHorizontal: Platform.OS === 'web' ? 0 : 20,
-  },
-  form: {
-    width: '100%',
-    gap: 16,
-  },
-  inputContainer: {
-    width: '100%',
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 15,
-    fontWeight: '500',
-    color: Platform.OS === 'ios' ? undefined : '#666',
-  },
-  textInput: {
-    width: '100%',
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: Platform.OS === 'ios' ? 16 : 12,
-    fontSize: 15,
-    minHeight: 80,
-  },
-  historyToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  historyDocuments: {
-    width: '100%',
-    gap: 12,
-  },
-  historyUploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 12,
-  },
-  historyButtonText: {
-    fontSize: 16,
-  },
-  selectedFiles: {
-    gap: 8,
-  },
-  selectedFile: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  fileName: {
-    fontSize: 14,
-  },  uploadButton: {
-    borderRadius: 12,
-    width: '100%',
-    minHeight: Platform.OS === 'web' ? 120 : 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Platform.OS === 'web' ? 20 : 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    borderWidth: Platform.OS === 'ios' ? 2 : 1,
-    borderStyle: 'dashed',
-  },
-  buttonContent: {
-    alignItems: 'center',
-    gap: Platform.OS === 'web' ? 12 : 8,
-  },
-  buttonTextContainer: {
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  buttonSubtext: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  selectedMainFile: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 8,
-  },
-  selectedFileName: {
-    fontSize: 16,
-  },
-  analyzeButton: {
-    width: '100%',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  analyzeButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 8,
-    width: '100%',
-    borderLeftWidth: 4,
-  },
-  errorText: {
-    fontSize: 14,
-    flex: 1,
-  },
-  loadingContainer: {
-    width: '100%',
-    minHeight: 120,
-    borderRadius: 12,
-    padding: 20,
-  },
-  loadingContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  loadingText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  progressBar: {
-    marginTop: 16,
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    width: '0%',
-    borderRadius: 2,
-  }
-});
