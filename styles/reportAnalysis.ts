@@ -1,17 +1,23 @@
 import { Platform, StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
-  container: {
+export const styles = StyleSheet.create({  container: {
     flex: 1,
     borderRadius: 0,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: '#FFFFFF',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
     overflow: 'hidden',
     margin: 0,
     width: '100%',
@@ -26,32 +32,39 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Platform.OS === 'ios' ? 16 : 14,
+    justifyContent: 'space-between',
+    padding: Platform.OS === 'ios' ? 20 : 16,
     borderBottomWidth: 1,
-    gap: 10,
   },
   headerTitle: {
-    fontSize: Platform.OS === 'ios' ? 18 : 16,
+    fontSize: Platform.OS === 'ios' ? 20 : 18,
     fontWeight: '600',
+    letterSpacing: -0.5,
   },
   scrollContainer: {
     flex: 1,
   },
   content: {
-    padding: Platform.OS === 'ios' ? 16 : 14,
-    gap: 16,
+    padding: Platform.OS === 'ios' ? 20 : 16,
+    gap: 20,
   },
   analysisContainer: {
-    padding: Platform.OS === 'ios' ? 16 : 14,
+    padding: Platform.OS === 'ios' ? 20 : 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   analysisText: {
     fontSize: Platform.OS === 'ios' ? 16 : 15,
@@ -63,9 +76,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: Platform.OS === 'ios' ? 40 : 32,
     gap: 16,
+    borderRadius: 12,
   },
   loadingText: {
     fontSize: Platform.OS === 'ios' ? 16 : 15,
+    fontWeight: '500',
   },
   errorContainer: {
     padding: Platform.OS === 'ios' ? 24 : 20,
@@ -80,6 +95,7 @@ export const styles = StyleSheet.create({
   errorTitle: {
     fontSize: Platform.OS === 'ios' ? 18 : 16,
     fontWeight: '600',
+    letterSpacing: -0.5,
   },
   errorText: {
     fontSize: Platform.OS === 'ios' ? 16 : 15,

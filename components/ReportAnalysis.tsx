@@ -55,7 +55,7 @@ export function ReportAnalysis({ analysis, isLoading }: ReportAnalysisProps) {
 
   if (isLoading) {
     return (
-      <ThemedView style={styles.loadingContainer}>
+      <ThemedView style={[styles.loadingContainer, { backgroundColor: colors.surface }]}>
         <ActivityIndicator size="large" color={colors.primary} />
         <ThemedText style={[styles.loadingText, { color: colors.primary }]}>
           Processing medical report...
@@ -68,7 +68,11 @@ export function ReportAnalysis({ analysis, isLoading }: ReportAnalysisProps) {
     return (
       <ThemedView style={[
         styles.errorContainer,
-        { backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.surface }
+        { 
+          backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.surface,
+          borderWidth: 1,
+          borderColor: colors.error + '40'
+        }
       ]}>
         <View style={styles.errorHeader}>
           <Ionicons name="alert-circle" size={24} color={colors.error} />
@@ -76,7 +80,7 @@ export function ReportAnalysis({ analysis, isLoading }: ReportAnalysisProps) {
             Analysis Failed
           </ThemedText>
         </View>
-        <ThemedText style={styles.errorText}>
+        <ThemedText style={[styles.errorText, { color: colors.text + 'CC' }]}>
           {analysis.error || 'Failed to analyze the medical report. Please try again.'}
         </ThemedText>
       </ThemedView>
@@ -90,24 +94,41 @@ export function ReportAnalysis({ analysis, isLoading }: ReportAnalysisProps) {
         styles.container,
         {
           backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderColor: colors.border
         },
         isWideScreen ? styles.wideContainer : { borderRadius: 0, margin: 0, width: '100%' }
       ]}
     >
       <ThemedView style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Ionicons name="document-text-outline" size={24} color={colors.primary} />
-        <ThemedText style={[styles.headerTitle, { color: colors.primary }]}>
-          Analysis Results
-        </ThemedText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Ionicons name="document-text-outline" size={24} color={colors.primary} />
+          <ThemedText style={[styles.headerTitle, { color: colors.text }]}>
+            Analysis Results
+          </ThemedText>
+        </View>
       </ThemedView>
 
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContainer} 
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={Platform.OS !== 'web'}>
         <ThemedView style={styles.content}>
           <ThemedView style={[
             styles.analysisContainer,
-            { backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.surface }
+            { 
+              backgroundColor: colorScheme === 'dark' ? colors.surfaceVariant : colors.surface,
+              borderWidth: 1,
+              borderColor: colors.border
+            }
           ]}>
-            <ThemedText style={[styles.analysisText, { color: colors.text }]}>
+            <ThemedText style={[
+              styles.analysisText, 
+              { 
+                color: colors.text,
+                lineHeight: Platform.OS === 'ios' ? 24 : 22 
+              }
+            ]}>
               {analysis.analysis}
             </ThemedText>
           </ThemedView>

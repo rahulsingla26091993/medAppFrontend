@@ -5,9 +5,9 @@
 
 const palette = {
   primary: {
-    light: '#0A7EA4',
-    main: '#065C78',
-    dark: '#044157',
+    light: '#66BB6A',
+    main: '#4CAF50',
+    dark: '#388E3C',
     contrast: '#FFFFFF',
   },
   grey: {

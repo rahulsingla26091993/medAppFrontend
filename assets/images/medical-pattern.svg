@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="320" viewBox="0 0 600 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pulse" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+  </defs>
+  <circle cx="300" cy="160" r="150" fill="url(#bg)"/>
+
+  <!-- Collage of medical icons -->
+
+  <!-- Stethoscope Icon (small) -->
+  <g transform="translate(100, 80) scale(0.2)">
+    <path d="M200,160 Q200,80 300,80 Q400,80 400,160 Q400,220 300,260 Q200,220 200,160 Z" fill="none" stroke="#2563eb" stroke-width="15"/>
+    <circle cx="200" cy="160" r="12" fill="#fff" stroke="#2563eb" stroke-width="10"/>
+    <circle cx="400" cy="160" r="12" fill="#fff" stroke="#2563eb" stroke-width="10"/>
+    <circle cx="300" cy="260" r="18" fill="#fff" stroke="#2563eb" stroke-width="12"/>
+  </g>
+
+  <!-- Plus Icon (small) -->
+  <g transform="translate(450, 50) scale(0.5)" opacity="0.8">
+    <rect x="-10" y="-30" width="20" height="60" rx="5" fill="#2563eb"/>
+    <rect x="-30" y="-10" width="60" height="20" rx="5" fill="#2563eb"/>
+  </g>
+
+  <!-- Pulse Line (small) -->
+  <path d="M50,250 L100,250 L110,220 L125,280 L150,200 L165,260 L180,240 L230,240" stroke="url(#pulse)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Medicine Icon (small) -->
+  <g transform="translate(500, 200) scale(0.4)">
+    <rect x="-20" y="-40" width="40" height="80" rx="10" fill="#fff"/>
+    <line x1="-20" y1="0" x2="20" y2="0" stroke="#2563eb" stroke-width="8"/>
+  </g>
+
+   <!-- DNA Helix (small) -->
+  <g transform="translate(200, 280) scale(0.2)">
+    <path d="M-50,-100 C-30,-80 30,-80 50,-100" stroke="#1e40af" stroke-width="10" fill="none"/>
+    <path d="M-50,-80 C-30,-60 30,-60 50,-80" stroke="#2563eb" stroke-width="10" fill="none"/>
+    <path d="M-50,-60 C-30,-40 30,-40 50,-60" stroke="#1e40af" stroke-width="10" fill="none"/>
+    <path d="M-50,-40 C-30,-20 30,-20 50,-40" stroke="#2563eb" stroke-width="10" fill="none"/>
+    <path d="M-50,-20 C-30,0 30,0 50,-20" stroke="#1e40af" stroke-width="10" fill="none"/>
+    <path d="M-50,0 C-30,20 30,20 50,0" stroke="#2563eb" stroke-width="10" fill="none"/>
+    <path d="M-50,20 C-30,40 30,40 50,20" stroke="#1e40af" stroke-width="10" fill="none"/>
+    <path d="M-50,40 C-30,60 30,60 50,40" stroke="#2563eb" stroke-width="10" fill="none"/>
+    <path d="M-50,60 C-30,80 30,80 50,60" stroke="#1e40af" stroke-width="10" fill="none"/>
+    <path d="M-50,80 C-30,100 30,100 50,80" stroke="#2563eb" stroke-width="10" fill="none"/>
+  </g>
+
+</svg>

@@ -27,25 +27,29 @@ export default function HomeScreen() {
       headerBackgroundColor={{
         light: colors.primaryLight,
         dark: colors.primaryDark
-      }}
-      headerImage={
+      }}      headerImage={
         <LinearGradient
-          colors={[colors.primary + '80', colors.primaryLight + '40']}
+          colors={[
+            colors.primary + 'CC',
+            colors.primary + '99',
+            colors.primaryLight + '80'
+          ]}
+          locations={[0, 0.5, 1]}
           style={StyleSheet.absoluteFillObject}>
           <Image
-            source={require('@/assets/images/partial-react-logo.png')}
-            style={[homeStyles.headerImage, { opacity: colorScheme === 'dark' ? 0.4 : 0.6 }]}
-            contentFit="contain"
+            source={require('@/assets/images/medical-pattern.svg')}
+            style={[homeStyles.headerImage, { opacity: colorScheme === 'dark' ? 0.4 : 0.5 }]}
+            contentFit="cover"
           />
         </LinearGradient>
       }>
       <ThemedView style={[homeStyles.container, isWideScreen && homeStyles.wideContainer]}>
         <ThemedView style={homeStyles.headerContent}>
           <ThemedView style={homeStyles.titleContainer}>
-            <ThemedText style={[homeStyles.title, { color: colors.primary }]}>
+            <ThemedText style={[homeStyles.title, { color: colors.text }]}>
               Medical Report Analyzer
             </ThemedText>
-            <ThemedText style={[homeStyles.subtitle, { color: colors.icon }]}>
+            <ThemedText style={[homeStyles.subtitle, { color: colorScheme === 'dark' ? colors.icon : colors.text + '99' }]}>
               Instant medical report analysis powered by AI
             </ThemedText>
           </ThemedView>
@@ -61,7 +65,7 @@ export default function HomeScreen() {
               accentColor={colors.primary}
             />
             <Feature
-              iconName="push-outline"
+              iconName="analytics-outline"
               title="Instant Results"
               description="Get AI-powered analysis in seconds"
               accentColor={colors.primary}

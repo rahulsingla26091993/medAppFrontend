@@ -4,6 +4,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 0,
+    backgroundColor: '#FFFFFF',
   },
   wideContainer: {
     maxWidth: 1200,
@@ -11,43 +12,43 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   headerContent: {
-    marginTop: Platform.OS === 'ios' ? 16 : 24,
-    marginBottom: 24,
+    marginTop: Platform.OS === 'ios' ? 20 : 24,
+    marginBottom: 32,
     paddingHorizontal: 20,
   },
   titleContainer: {
-    marginBottom: 24,
+    marginBottom: 32,
     alignItems: 'center',
   },
   title: {
-    fontSize: Platform.OS === 'ios' ? 32 : 28,
+    fontSize: Platform.OS === 'ios' ? 36 : 32,
     fontWeight: 'bold',
     textAlign: 'center',
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
   subtitle: {
     fontSize: 20,
     textAlign: 'center',
     marginTop: 12,
-    opacity: 0.8,
+    lineHeight: 28,
   },
   featuresContainer: {
-    marginBottom: 24,
+    marginBottom: 32,
     paddingHorizontal: 20,
   },
   featuresGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 16,
     justifyContent: 'center',
   },
   featureCard: {
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: 16,
+    borderRadius: 16,
     overflow: 'hidden',
     flex: 1,
-    minWidth: Platform.OS === 'web' ? 300 : '100%',
-    maxWidth: Platform.OS === 'web' ? 380 : undefined,
+    minWidth: Platform.OS === 'web' ? 320 : '100%',
+    maxWidth: Platform.OS === 'web' ? 400 : undefined,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -61,30 +62,31 @@ export const styles = StyleSheet.create({
     }),
   },
   featureGradient: {
-    padding: 20,
+    padding: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 20,
   },
   featureIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 20,
   },
   featureTextContainer: {
     flex: 1,
+    gap: 8,
   },
   featureTitle: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   featureDescription: {
     fontSize: 16,
-    opacity: 0.7,
     lineHeight: 22,
+    opacity: 0.8,
   },
   headerImage: {
     width: '100%',
@@ -93,6 +95,7 @@ export const styles = StyleSheet.create({
   },
   uploadSection: {
     marginBottom: 40,
+    paddingHorizontal: 20,
   },
   uploadSectionWide: {
     maxWidth: 800,
@@ -113,6 +116,7 @@ export const styles = StyleSheet.create({
   errorText: {
     color: '#c62828',
     fontSize: 15,
+    lineHeight: 20,
   },
   analysisContainer: {
     borderRadius: 0,

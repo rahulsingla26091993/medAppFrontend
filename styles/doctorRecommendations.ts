@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
-  container: {
+export const styles = StyleSheet.create({  container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   contentContainer: {
     padding: 20,
@@ -22,11 +22,13 @@ export const styles = StyleSheet.create({
   },
   recommendationsContainer: {
     gap: 16,
-  },
-  recommendationCard: {
+  },  recommendationCard: {
     flexDirection: 'row',
     padding: 16,
     borderRadius: 12,
+    backgroundColor: '#F1F8F1',
+    borderColor: '#4CAF50',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
